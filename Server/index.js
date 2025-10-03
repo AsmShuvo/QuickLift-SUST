@@ -30,7 +30,7 @@ app.use(
     secret: process.env.SESSION_SECRET || "secret_key",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }, // secure: true in production over HTTPS
+    cookie: { secure: false }, // set secure:true in production over https
   })
 );
 
@@ -42,10 +42,10 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/callback",
+      callbackURL: "http://localhost:5000/auth/google/callback",
     },
     (accessToken, refreshToken, profile, done) => {
-      return done(null, profile);
+      return done(null, profile); // here you'd save/find user in DB
     }
   )
 );
@@ -58,27 +58,23 @@ passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
-app.get(
-  "/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
+// Routes
+app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
 app.get(
   "/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: "/" }),
+  passport.authenticate("google", { failureRedirect: "http://localhost:5173/auth/login" }),
   (req, res) => {
-    res.redirect("http://localhost:5173/dashboard");
+    res.redirect("http://localhost:5173/"); // send to React
   }
 );
 
-app.get("/", (req, res) => {
-  res.send("Server is running...");
-});
+app.get("/", (req, res) => res.send("Server is running..."));
 
 app.get("/logout", (req, res, next) => {
   req.logout(err => {
-    if (err) { return next(err); }
-    res.redirect("/");
+    if (err) return next(err);
+    res.redirect("http://localhost:5173/auth/login"); // back to login
   });
 });
 
