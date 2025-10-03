@@ -5,6 +5,7 @@ import Login from "../pages/Login/Login";
 import SignUp from "../pages/SignUp/SignUp";
 import Main from "../Layout/Main";
 import ProtectedRoute from "../routes/ProtectedRoute";
+import SetupProfile from "../pages/SetupProfile/SetupProfile";
 
 export const routes = createBrowserRouter([
   {
@@ -34,5 +35,9 @@ export const routes = createBrowserRouter([
         element: <SignUp />,
       },
     ],
+  },
+  {
+    path: "/setup-profile",
+    element: <SetupProfile />,
   },
 ]);

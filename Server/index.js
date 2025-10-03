@@ -6,6 +6,7 @@ const passport = require("passport");
 const { Strategy: GoogleStrategy } = require("passport-google-oauth20");
 const session = require("express-session");
 const connectDB = require("./config/db");
+const User = require("./model/User")
 
 dotenv.config();
 connectDB();
@@ -44,28 +45,68 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: "http://localhost:5000/auth/google/callback",
     },
-    (accessToken, refreshToken, profile, done) => {
-      return done(null, profile); // here you'd save/find user in DB
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        let user = await User.findOne({ googleId: profile.id });
+        if (!user) {
+          user = await User.create({
+            googleId: profile.id,
+            displayName: profile.displayName,
+            email: profile.emails[0].value,
+            photo: profile.photos[0].value,
+            role: null, // default, must choose later
+          });
+        }
+        return done(null, user);
+      } catch (err) {
+        return done(err, null);
+      }
     }
   )
 );
 
 passport.serializeUser((user, done) => {
-  done(null, user);
+  done(null, user.id);
 });
-
-passport.deserializeUser((user, done) => {
-  done(null, user);
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
 });
 
 // Routes
+app.post("/user/role", async (req, res) => {
+  if (!req.user) return res.status(401).send("Not authenticated");
+
+  const { role } = req.body;
+
+  if (!["biker", "passenger"].includes(role)) {
+    return res.status(400).send("Invalid role");
+  }
+
+  try {
+    req.user.role = role;
+    await req.user.save();
+    res.json(req.user);
+  } catch (err) {
+    res.status(500).send("Error saving role");
+  }
+});
+
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
 app.get(
   "/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "http://localhost:5173/auth/login" }),
   (req, res) => {
-    res.redirect("http://localhost:5173/"); // send to React
+    if (!req.user.role) {
+      res.redirect("http://localhost:5173/setup-profile");
+    } else {
+      res.redirect("http://localhost:5173/");
+    }
   }
 );
 
