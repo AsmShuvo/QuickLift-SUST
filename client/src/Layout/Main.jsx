@@ -4,13 +4,18 @@ import Footer from "../Components/Footer";
 
 const Main = () => {
   return (
-    <>
-      <Navbar/>
-      <div className="min-h-screen">
-        <Outlet />
+    <div className="flex bg-[#121212] text-white min-h-screen">
+      {/* Sidebar */}
+      <Navbar />
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col">
+        <div className="flex-1 p-6 overflow-y-auto">
+          <Outlet />
+        </div>
+        <Footer />
       </div>
-      <Footer/>
-    </>
+    </div>
   );
 };
 
