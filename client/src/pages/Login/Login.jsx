@@ -35,7 +35,7 @@ const Login = () => {
         {/* Left side: Logo */}
         <div className="flex flex-col items-center md:items-start text-center md:text-left">
           <img
-            src="/images/logo.PNG"
+            src="/images/logo.png"
             alt="QuickLift Logo"
             className="w-32 h-32 rounded-4xl md:w-40 md:h-40 drop-shadow-[0_0_25px_rgba(255,102,0,0.45)] mb-4"
           />
