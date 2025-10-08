@@ -7,6 +7,8 @@ const { Strategy: GoogleStrategy } = require("passport-google-oauth20");
 const session = require("express-session");
 const connectDB = require("./config/db");
 const User = require("./model/User")
+const rideRoutes = require("./routes/rideRoutes");
+
 
 dotenv.config();
 connectDB();
@@ -14,6 +16,7 @@ connectDB();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.use(morgan("dev"));
 app.use(express.json());
 app.use(
   cors({
@@ -22,16 +25,14 @@ app.use(
   })
 );
 
-if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
-}
+
 
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "secret_key",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }, // set secure:true in production over https
+    cookie: { secure: false, sameSite: "lax" }, // set secure:true in production over https
   })
 );
 
@@ -77,7 +78,11 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// Routes
+
+app.use("/api/rides", rideRoutes);
+
+
+// **************************auth routes*********************************
 app.post("/user/role", async (req, res) => {
   if (!req.user) return res.status(401).send("Not authenticated");
 

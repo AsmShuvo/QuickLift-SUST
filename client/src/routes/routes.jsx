@@ -6,6 +6,7 @@ import SignUp from "../pages/SignUp/SignUp";
 import Main from "../Layout/Main";
 import ProtectedRoute from "../routes/ProtectedRoute";
 import SetupProfile from "../pages/SetupProfile/SetupProfile";
+import CreateRide from "../pages/CreateRide/CreateRide";
 
 export const routes = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ export const routes = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: "create-ride",
+        element: <CreateRide/>
+      }
     ],
   },
   {
